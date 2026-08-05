@@ -1,9 +1,15 @@
 # Render Blueprint — https://render.com/docs/blueprint-spec
 #
-# Connect this repo on Render (New > Blueprint) and it provisions a free
-# Postgres database plus this web service, wired together automatically.
-# Verify field names against Render's current blueprint docs if the
-# blueprint fails to parse — the spec has changed over time.
+# Connect this repo on Render (New > Blueprint). DATABASE_URL points at an
+# externally hosted Postgres (Neon/Supabase, free tier) rather than Render's
+# own managed Postgres — Render will prompt for it during setup since it's
+# marked `sync: false` below. Paste in the connection string there.
+#
+# startCommand runs migrations then the (idempotent) seed script on every
+# boot, so the first deploy provisions the schema and seed data without
+# needing a manual shell session. Verify field names against Render's
+# current blueprint docs if the blueprint fails to parse — the spec has
+# changed over time and this hasn't been tested against a live account.
 
 services:
   - type: web
@@ -12,19 +18,15 @@ services:
     plan: free
     branch: claude/hello-32rim1
     buildCommand: npm install && npm run build
-    startCommand: npm run db:deploy && npm start
+    startCommand: npm run db:deploy && npm run db:seed && npm start
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: studentnest-db
-          property: connectionString
+        sync: false
       - key: SESSION_SECRET
         generateValue: true
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
       - key: NODE_ENV
         value: production
-
-databases:
-  - name: studentnest-db
-    plan: free
-    databaseName: studentnest
-    user: studentnest
