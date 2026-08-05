@@ -1,28 +1,29 @@
 import Link from "next/link";
-import { getHeroImage } from "@/lib/hero-images";
-import { UnsplashImage } from "@/components/UnsplashImage";
+import { SiteImage } from "@/components/SiteImage";
 
 const ROLE_CARDS = [
   {
-    slot: "student" as const,
+    src: "/images/for-students.jpg",
+    alt: "Students walking together on campus",
     title: "For students",
     body: "Search hostels, self-contained rooms, and shared apartments near your institution, filtered by budget and gender policy.",
   },
   {
-    slot: "landlord" as const,
+    src: "/images/for-landlords.jpg",
+    alt: "Landlord handing over house keys",
     title: "For landlords",
     body: "List your property with photos and amenities. Once approved, it's visible to students actively searching near your location.",
   },
   {
-    slot: "agent" as const,
+    src: "/images/for-agents.jpg",
+    alt: "Agent finalizing a property agreement",
     title: "For agents",
+    badge: "Verified Agent",
     body: "Manage listings on behalf of multiple landlords, all under one verified profile students can trust.",
   },
 ];
 
 export default function Home() {
-  const heroImage = getHeroImage("hero");
-
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-16 px-4 py-12 sm:px-6 sm:py-20">
       <section className="grid items-center gap-10 lg:grid-cols-2">
@@ -46,8 +47,9 @@ export default function Home() {
           </div>
         </div>
 
-        <UnsplashImage
-          image={heroImage}
+        <SiteImage
+          src="/images/hero-property.jpg"
+          alt="Modern student housing property"
           priority
           sizes="(min-width: 1024px) 50vw, 100vw"
           className="aspect-[4/3] w-full rounded-2xl shadow-sm lg:aspect-square"
@@ -57,11 +59,13 @@ export default function Home() {
       <section className="grid gap-4 sm:grid-cols-3">
         {ROLE_CARDS.map((role) => (
           <div
-            key={role.slot}
+            key={role.src}
             className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
           >
-            <UnsplashImage
-              image={getHeroImage(role.slot)}
+            <SiteImage
+              src={role.src}
+              alt={role.alt}
+              badge={role.badge}
               sizes="(min-width: 640px) 33vw, 100vw"
               className="aspect-video w-full"
             />
