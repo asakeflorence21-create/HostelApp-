@@ -26,10 +26,19 @@ export function LoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
+
+      let data: { error?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        setError(
+          `Server returned an unexpected response (HTTP ${res.status}). If the app was recently idle, wait a moment and try again.`
+        );
+        return;
+      }
 
       if (!res.ok) {
-        setError(data.error || "Something went wrong.");
+        setError(data.error || `Something went wrong (HTTP ${res.status}).`);
         return;
       }
 
@@ -37,7 +46,7 @@ export function LoginForm() {
       router.push(next);
       router.refresh();
     } catch {
-      setError("Network error. Please try again.");
+      setError("Could not reach the server. Check your connection and try again.");
     } finally {
       setPending(false);
     }

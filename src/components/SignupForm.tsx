@@ -41,10 +41,19 @@ export function SignupForm({ institutions }: { institutions: Institution[] }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
+
+      let data: { error?: string; fieldErrors?: Record<string, string[]> } = {};
+      try {
+        data = await res.json();
+      } catch {
+        setFormError(
+          `Server returned an unexpected response (HTTP ${res.status}). If the app was recently idle, wait a moment and try again.`
+        );
+        return;
+      }
 
       if (!res.ok) {
-        setFormError(data.error || "Something went wrong.");
+        setFormError(data.error || `Something went wrong (HTTP ${res.status}).`);
         setFieldErrors(data.fieldErrors || {});
         return;
       }
@@ -52,7 +61,7 @@ export function SignupForm({ institutions }: { institutions: Institution[] }) {
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setFormError("Network error. Please try again.");
+      setFormError("Could not reach the server. Check your connection and try again.");
     } finally {
       setPending(false);
     }
