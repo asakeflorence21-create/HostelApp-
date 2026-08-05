@@ -1,0 +1,133 @@
+// StudentNest — Phase 1 MVP schema
+// Covers: auth/roles, institutions, listings + photos, admin approval.
+// Messaging, bookings, and payments are added in later build passes.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  LANDLORD
+  AGENT
+  ADMIN
+}
+
+enum RoomType {
+  HOSTEL
+  SELF_CONTAINED
+  ONE_BED
+  SHARED
+}
+
+enum GenderPolicy {
+  MALE
+  FEMALE
+  MIXED
+}
+
+enum Amenity {
+  WATER
+  ELECTRICITY
+  WIFI
+  SECURITY
+  FURNISHED
+  PARKING
+  KITCHEN
+  GENERATOR
+}
+
+enum ListingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Institution {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  city      String
+  state     String
+  createdAt DateTime @default(now())
+
+  students User[]
+  listings Listing[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String?  @unique
+  phone        String?  @unique
+  passwordHash String
+  name         String
+  role         Role
+
+  // Students select their institution at signup.
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id])
+
+  // Manual admin verification badge for landlords/agents.
+  verified Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings Listing[]
+
+  @@index([role])
+}
+
+model Listing {
+  id String @id @default(cuid())
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String
+
+  // Amounts stored as whole Naira (no kobo precision needed for MVP rent listings).
+  price      Int
+  cautionFee Int?
+  agencyFee  Int?
+
+  roomType     RoomType
+  genderPolicy GenderPolicy
+  amenities    Amenity[]
+
+  address              String
+  city                 String
+  distanceFromCampusKm Float?
+  latitude             Float?
+  longitude            Float?
+
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+
+  status          ListingStatus @default(PENDING)
+  rejectionReason String?
+
+  photos ListingPhoto[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([institutionId])
+  @@index([ownerId])
+}
+
+model ListingPhoto {
+  id        String  @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url       String
+  position  Int     @default(0)
+
+  @@index([listingId])
+}
