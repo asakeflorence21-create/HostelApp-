@@ -14,7 +14,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "fetch:images": "node scripts/fetch-unsplash-images.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
